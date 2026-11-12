@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MONSTER1 👹</title>
+<style>
+  body{font-family:Arial;background:#111;color:white;text-align:center;padding:20px}
+  h1{color:#a855f7}
+  .box{background:#1f1f1f;border-radius:15px;padding:20px;margin:15px auto;max-width:450px}
+  button{background:#a855f7;color:white;border:none;padding:12px 20px;border-radius:10px;font-size:16px;cursor:pointer;margin:5px}
+  button:hover{background:#9333ea}
+  #slot{font-size:50px;margin:15px}
+  #dado{font-size:70px}
+  canvas{background:white;border-radius:10px;width:100%}
+  .opt{display:block;width:100%;background:#333;margin:5px 0}
+</style>
+</head>
+<body>
+<h1>👹 MONSTER1 👹</h1>
+<p>Punti: <b id="punti">0</b></p>
+
+<!-- SLOT -->
+<div class="box">
+  <h2>🎰 SLOT</h2>
+  <div id="slot">🍒 | 🍋 | ⭐</div>
+  <button onclick="slot()">GIRA</button>
+  <p id="slotRis"></p>
+</div>
+
+<!-- DADO -->
+<div class="box">
+  <h2>🎲 DADO</h2>
+  <div id="dado">🎲</div>
+  <button onclick="dado()">LANCLA</button>
+  <p id="dadoRis"></p>
+</div>
+
+<!-- QUIZ -->
+<div class="box">
+  <h2>🧠 QUIZ</h2>
+  <p id="domanda">Premi INIZIA</p>
+  <div id="opzioni"></div>
+  <button onclick="quiz()">INIZIA QUIZ</button>
+  <p id="quizRis"></p>
+</div>
+
+<!-- PESCA -->
+<div class="box">
+  <h2>🎣 PESCA</h2>
+  <div style="font-size:60px">🎣</div>
+  <button onclick="pesca()">PESCA</button>
+  <p id="pescaRis">Lancia l'amo...</p>
+</div>
+
+<!-- DINO -->
+<div class="box">
+  <h2>🦖 DINO GAME</h2>
+  <canvas id="game" width="400" height="120"></canvas>
+  <br><button onclick="salta()">SALTA ⬆️</button>
+  <button onclick="startDino()">RICOMINCIA</button>
+  <p id="dinoRis">Premi SPAZIO o SALTA per saltare</p>
+</div>
+
+<script>
+let punti = 0
+function aggiorna(){ document.getElementById('punti').innerText = punti }
+
+// SLOT
+function slot(){
+  const s=['🍒','🍋','🍉','⭐','💎','7️⃣']
+  const a=s[Math.floor(Math.random()*s.length)]
+  const b=s[Math.floor(Math.random()*s.length)]
+  const c=s[Math.floor(Math.random()*s.length)]
+  document.getElementById('slot').innerText = `${a} | ${b} | ${c}`
+  if(a===b && b===c){ punti+=50; document.getElementById('slotRis').innerText='JACKPOT! +50 punti 🔥' }
+  else if(a===b || b===c || a===c){ punti+=10; document.getElementById('slotRis').innerText='Coppia! +10 punti' }
+  else document.getElementById('slotRis').innerText='Riprova 😅'
+  aggiorna()
+}
+
+// DADO
+function dado(){
+  const n=Math.floor(Math.random()*6)+1
+  const facce=['','⚀','⚁','⚂','⚃','⚄','⚅']
+  document.getElementById('dado').innerText = facce[n]
+  document.getElementById('dadoRis').innerText = n===6 ? 'Sei! +20 punti 🎉' : `Hai fatto ${n}`
+  if(n===6) punti+=20
+  aggiorna()
+}
+
+// QUIZ
+const domande=[
+  {q:'Capitale d\\'Italia?', opts:['Milano','Roma','Napoli'], r:1},
+  {q:'Quanto fa 5+7?', opts:['11','12','13'], r:1},
+  {q:'Chi ha scritto Harry Potter?', opts:['Tolkien','Rowling','Dante'], r:1},
+  {q:'Colore del cielo?', opts:['Verde','Blu','Rosso'], r:1},
+]
+let quizCorrenta=0
+function quiz(){
+  quizCorrenta=Math.floor(Math.random()*domande.length)
+  const d=domande[quizCorrenta]
+  document.getElementById('domanda').innerText=d.q
+  document.getElementById('quizRis').innerText=''
+  document.getElementById('opzioni').innerHTML=''
+  d.opts.forEach((o,i)=>{
+    const b=document.createElement('button')
+    b.className='opt'; b.innerText=o
+    b.onclick=()=>checkQuiz(i)
+    document.getElementById('opzioni').appendChild(b)
+  })
+}
+function checkQuiz(i){
+  if(i===domande[quizCorrenta].r){ punti+=10; document.getElementById('quizRis').innerText='Giusto! +10 ✅' }
+  else document.getElementById('quizRis').innerText='Sbagliato ❌'
+  aggiorna()
+}
+
+// PESCA
+function pesca(){
+  const pesci=[
+    {nome:'🐟 Pesce piccolo', p:5},
+    {nome:'🐠 Pesce tropicale', p:10},
+    {nome:'🦈 Squalo!', p:30},
+    {nome:'👢 Stivale vecchio', p:0},
+    {nome:'💎 Diamante!', p:100},
+    {nome:'🦀 Granchio', p:15},
+  ]
+  const r=pesci[Math.floor(Math.random()*pesci.length)]
+  punti+=r.p
+  document.getElementById('pescaRis').innerText=`Hai pescato: ${r.nome} +${r.p} punti`
+  aggiorna()
+}
+
+// DINO
+const canvas=document.getElementById('game')
+const ctx=canvas.getContext('2d')
+let dinoY=90, vel=0, ostX=400, ostVelo=3, score=0, gioco=false
+function startDino(){ gioco=true; ostX=400; score=0; dinoY=90; document.getElementById('dinoRis').innerText='Gioca!' }
+function salta(){ if(gioco && dinoY>=90) vel=-10 }
+document.addEventListener('keydown',e=>{ if(e.code==='Space') salta() })
+function loop(){
+  ctx.clearRect(0,0,400,120)
+  ctx.fillStyle='#111'; ctx.fillRect(0,110,400,2)
+  vel+=0.6; dinoY+=vel; if(dinoY>90){dinoY=90; vel=0}
+  ctx.font='30px Arial'; ctx.fillText('🦖',20,dinoY+20)
+  if(gioco){
+    ostX-=ostVelo; score++
+    if(ostX<0){ ostX=400; ostVelo+=0.2 }
+    ctx.fillText('🌵',ostX,110)
+    if(ostX<45 && ostX>10 && dinoY>70){
+      gioco=false; punti+=Math.floor(score/20)
+      document.getElementById('dinoRis').innerText=`Game Over! Punteggio ${score} - Hai guadagnato ${Math.floor(score/20)} punti`
+      aggiorna()
+    }
+  }
+  requestAnimationFrame(loop)
+}
+loop()
+</script>
+</body>
+</html>
